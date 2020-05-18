@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/jbeveland27/actions-tester/compare/v1.1.0...v1.2.0) (2020-05-18)
+
+
+### Features
+
+* seeing if node_modules can be cached ([02e6936](https://github.com/jbeveland27/actions-tester/commit/02e6936115ca1baa808bd1afca8096bd2d680597))
+
 # [1.1.0](https://github.com/jbeveland27/actions-tester/compare/v1.0.0...v1.1.0) (2020-05-18)
 
 
