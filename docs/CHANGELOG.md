@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/jbeveland27/actions-tester/compare/v1.2.0...v1.3.0) (2020-05-18)
+
+
+### Features
+
+* testing node_modules caching ([f667f38](https://github.com/jbeveland27/actions-tester/commit/f667f388dd02402b8c0464f45fcc6ef6636e118e))
+
 # [1.2.0](https://github.com/jbeveland27/actions-tester/compare/v1.1.0...v1.2.0) (2020-05-18)
 
 
