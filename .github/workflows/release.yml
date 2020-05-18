@@ -22,11 +22,11 @@ jobs:
       - name: Cache Deps
         uses: actions/cache@v1
         with:
-          path: ~/.npm
+          path: node_modules
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
-      
+
       - name: Install dependencies
         run: npm install
 
@@ -53,11 +53,11 @@ jobs:
       - name: Download Cached Deps
         uses: actions/cache@v1
         with:
-          path: ~/.npm
+          path: node_modules
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
-      
+
       - name: Install dependencies
         run: npm install
 
