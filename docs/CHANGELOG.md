@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/jbeveland27/actions-tester/compare/v1.0.0...v1.1.0) (2020-05-18)
+
+
+### Features
+
+* add awesome README content ([14faf63](https://github.com/jbeveland27/actions-tester/commit/14faf63f540634caa9914795c9326e7c304f2514))
+
 # 1.0.0 (2020-05-18)
 
 
