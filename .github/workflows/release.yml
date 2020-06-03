@@ -55,9 +55,9 @@ jobs:
           git config --local user.name "${{ env.THIRD_PARTY_GIT_AUTHOR_NAME }}"
 
           echo "Updated project data files -- committing"
-          touch test.md
-          git add test.md
-          git commit -m "chore: added test.md file"
+          touch test${{ github.run_id }}.md
+          git add test${{ github.run_id }}.md
+          git commit -m "chore: added test${{ github.run_id }}.md file"
 
           # Push to both develop and master here rather than using github-push-action
           # remote_repo="https://${GITHUB_ACTOR}:${{ secrets.OPENSOURCE_BOT_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git"
