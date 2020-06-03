@@ -46,6 +46,8 @@ jobs:
         uses: actions/checkout@v2
         with:
           ref: develop
+          fetch-depth: 0
+          token: ${{ secrets.OPENSOURCE_BOT_TOKEN }}
 
       - name: Commit data files
         run: |
@@ -57,14 +59,14 @@ jobs:
           git commit -m "chore: added test.md file"
 
           # Push to both develop and master here rather than using github-push-action
-          remote_repo="https://${GITHUB_ACTOR}:${{ secrets.OPENSOURCE_BOT_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git"
+          # remote_repo="https://${GITHUB_ACTOR}:${{ secrets.OPENSOURCE_BOT_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git"
 
-          git push "${remote_repo}" develop
+          git push origin develop
           CHERRYCOMMIT=`git log -n1 | head -n1 | cut -c8-`
 
           git checkout master
           git cherry-pick $CHERRYCOMMIT
-          git push "${remote_repo}" master
+          git push origin master
 
   job-generate-release:
     runs-on: ubuntu-latest
