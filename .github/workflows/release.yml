@@ -56,7 +56,7 @@ jobs:
           git commit test.js -m "chore: added test.md file"
 
           # Push to both develop and master here rather than using github-push-action
-          remote_repo="https://${GITHUB_ACTOR}:${{ secrets.OPENSOURCE_BOT_TOKEN }}@github.com/${REPOSITORY}.git"
+          remote_repo="https://${GITHUB_ACTOR}:${{ secrets.OPENSOURCE_BOT_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git"
 
           git push "${remote_repo}" develop
           CHERRYCOMMIT=`git log -n1 | head -n1 | cut -c8-`
