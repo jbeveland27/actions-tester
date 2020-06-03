@@ -45,7 +45,7 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v2
         with:
-          ref: develop
+          ref: test
           fetch-depth: 0
           token: ${{ secrets.OPENSOURCE_BOT_TOKEN }}
 
@@ -61,7 +61,7 @@ jobs:
           # Push to both develop and master here rather than using github-push-action
           # remote_repo="https://${GITHUB_ACTOR}:${{ secrets.OPENSOURCE_BOT_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git"
 
-          git push origin develop
+          git push origin test
           CHERRYCOMMIT=`git log -n1 | head -n1 | cut -c8-`
 
           git checkout master
