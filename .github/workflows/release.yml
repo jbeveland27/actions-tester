@@ -41,6 +41,7 @@ jobs:
   job-test-commits:
     runs-on: ubuntu-latest
     needs: job-checkout-and-build
+    if: "!contains(github.event.head_commit.message, 'chore: added test file')"
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
@@ -57,7 +58,7 @@ jobs:
           echo "Updated project data files -- committing"
           touch test${{ github.run_id }}.md
           git add test${{ github.run_id }}.md
-          git commit -m "chore: added test${{ github.run_id }}.md file"
+          git commit -m "chore: added test file"
 
           # Push to both develop and master here rather than using github-push-action
           # remote_repo="https://${GITHUB_ACTOR}:${{ secrets.OPENSOURCE_BOT_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git"
