@@ -1,0 +1,7 @@
+{
+    "schemaType": "LAUNCHER",
+    "id": "actions-tester-nerdpack-launcher",
+    "displayName": "ActionsTesterNerdpackLauncher",
+    "description": "Describe me",
+    "rootNerdletId": "actions-tester-nerdpack-nerdlet"
+}
