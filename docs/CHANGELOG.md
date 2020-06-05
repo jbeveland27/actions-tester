@@ -1,3 +1,10 @@
+## [1.3.1](https://github.com/jbeveland27/actions-tester/compare/v1.3.0...v1.3.1) (2020-06-05)
+
+
+### Bug Fixes
+
+* removing "nr1" from package.json ([9ecafa3](https://github.com/jbeveland27/actions-tester/commit/9ecafa3b5d0192978057d71c626d506c45b9ff71))
+
 # [1.3.0](https://github.com/jbeveland27/actions-tester/compare/v1.2.0...v1.3.0) (2020-05-18)
 
 
