@@ -14,9 +14,6 @@
     "type": "git",
     "url": "git+https://github.com/jbeveland27/actions-tester.git"
   },
-  "nr1": {
-    "uuid": "99a293fc-c7ef-4397-9117-136b159f8f15"
-  },
   "author": "jbeveland27",
   "license": "MIT",
   "bugs": {
