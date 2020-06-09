@@ -16,6 +16,8 @@ jobs:
     steps:
       - name: Print Payload
         run: |
+          echo ${{ github.event }}
+          echo ${{ toJson(github.event) }}
           echo ${{ toJson(github.event.gollum) }}
   job-sync-docs-to-wiki:
     runs-on: ubuntu-latest
