@@ -1,0 +1,30 @@
+name: Documentation
+
+on:
+  push:
+    branches:
+      - develop
+    paths:
+      - "docs/**"
+  repository_dispatch:
+    types: [docs]
+  gollum:
+
+jobs:
+  job-sync-wiki-to-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print Payload
+        run: |
+          echo ${{ toJson(github.event.gollum) }}
+  job-sync-docs-to-wiki:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      # Additional steps to generate documentation in "Documentation" directory
+      - name: Upload Documentation to Wiki
+        uses: SwiftDocOrg/github-wiki-publish-action@v1
+        with:
+          path: "docs"
+        env:
+          GH_PERSONAL_ACCESS_TOKEN: ${{ secrets.NEWRELIC_BOT_TOKEN }}
