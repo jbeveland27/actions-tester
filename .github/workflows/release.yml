@@ -21,55 +21,31 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v1
         with:
-          node-version: 12
+          node-version: 10.x
 
-      - name: Cache Deps
+      - name: Cache node_modules
+        id: cache-node-modules
         uses: actions/cache@v1
+        env:
+          cache-name: node-modules
         with:
-          path: node_modules
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          path: ~/.npm
+          key: ${{ runner.os }}-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
-            ${{ runner.os }}-node-
+            ${{ runner.os }}-${{ env.cache-name }}-
 
-      - name: Install dependencies
-        run: npm install
+      - name: Install Dependencies
+        run: npm ci
 
-      - name: Build
-        run: npm run build
+      - name: Install NR1 CLI
+        run: curl -s https://cli.nr-ext.net/installer.sh | sudo bash
 
-  # job-test # needed??
-  job-test-commits:
-    runs-on: ubuntu-latest
-    needs: job-checkout-and-build
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v2
-        with:
-          ref: test
-          fetch-depth: 0
-          token: ${{ secrets.OPENSOURCE_BOT_TOKEN }}
-
-      - name: Commit data files
+      - name: NR1 Nerdpack Build
         run: |
-          git config --local user.email "${{ env.THIRD_PARTY_GIT_AUTHOR_EMAIL }}"
-          git config --local user.name "${{ env.THIRD_PARTY_GIT_AUTHOR_NAME }}"
+          nr1 nerdpack:build
+          nr1 nerdpack:validate
 
-          echo "Updated project data files -- committing"
-          touch test${{ github.run_id }}.md
-          git add test${{ github.run_id }}.md
-          git commit -m "chore: added test${{ github.run_id }}.md file"
-
-          # Push to both develop and master here rather than using github-push-action
-          # remote_repo="https://${GITHUB_ACTOR}:${{ secrets.OPENSOURCE_BOT_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git"
-
-          git push origin test
-          CHERRYCOMMIT=`git log -n1 | head -n1 | cut -c8-`
-
-          git checkout master
-          git cherry-pick $CHERRYCOMMIT
-          git push origin master
-
-  job-generate-release:
+  job-generate-third-party-notices:
     runs-on: ubuntu-latest
     needs: job-checkout-and-build
     steps:
@@ -79,24 +55,177 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v1
         with:
-          node-version: 12
-
-      # - name: Install dependencies
-      #   run: npm ci
+          node-version: 10.x
 
       - name: Download Cached Deps
+        id: cache-node-modules
         uses: actions/cache@v1
+        env:
+          cache-name: node-modules
         with:
-          path: node_modules
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          path: ~/.npm
+          key: ${{ runner.os }}-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
-            ${{ runner.os }}-node-
+            ${{ runner.os }}-${{ env.cache-name }}-
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Install OSS CLI
+        run: |
+          sudo npm install -g @newrelic/newrelic-oss-cli
+
+      - name: Generate Third Party Notices
+        id: generate-notices
+        run: |
+          if [ ! -f "third_party_manifest.json" ]; then
+            echo "::error::third_party_manifest.json is missing. Must generate using the newrelic-oss-cli."
+            exit 1
+          fi
+
+          # latest commit
+          LATEST_COMMIT=$(git rev-parse HEAD)
+
+          # latest commit where package.json was changed
+          LAST_CHANGED_COMMIT=$(git log -1 --format=format:%H --full-diff package.json)
+
+          if [ $LAST_CHANGED_COMMIT = $LATEST_COMMIT ]; then
+            git config user.email "${{ env.THIRD_PARTY_GIT_AUTHOR_EMAIL }}"
+            git config user.name "${{ env.THIRD_PARTY_GIT_AUTHOR_NAME }}"
+
+            oss third-party manifest
+            oss third-party notices
+
+            git add third_party_manifest.json
+            git add THIRD_PARTY_NOTICES.md
+
+            git commit -m 'chore: update third-party manifest and notices [skip ci]'
+            echo "::set-output name=commit::true"
+          else
+            echo "No change in package.json, not regenerating third-party notices"
+          fi
+
+      - name: Temporarily disable "required_pull_request_reviews" branch protection
+        id: disable-branch-protection
+        if: always()
+        continue-on-error: true
+        uses: actions/github-script@v1
+        with:
+          github-token: ${{ secrets.OPENSOURCE_BOT_TOKEN }}
+          previews: luke-cage-preview
+          script: |
+            const result = await github.repos.updateBranchProtection({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              branch: 'master',
+              required_status_checks: null,
+              restrictions: null,
+              enforce_admins: null,
+              required_pull_request_reviews: null
+            })
+            console.log("Result:", result)
+
+      - name: Push Commit
+        if: steps.generate-notices.outputs.commit == 'true'
+        uses: ad-m/github-push-action@v0.6.0
+        with:
+          github_token: ${{ secrets.OPENSOURCE_BOT_TOKEN }}
+
+      - name: Re-enable "required_pull_request_reviews" branch protection
+        id: enable-branch-protection
+        if: always()
+        continue-on-error: true
+        uses: actions/github-script@v1
+        with:
+          github-token: ${{ secrets.OPENSOURCE_BOT_TOKEN }}
+          previews: luke-cage-preview
+          script: |
+            const result = await github.repos.updateBranchProtection({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              branch: 'master',
+              required_status_checks: null,
+              restrictions: null,
+              enforce_admins: null,
+              required_pull_request_reviews: {
+                required_approving_review_count: 1
+              }
+            })
+            console.log("Result:", result)
+
+  job-generate-release:
+    runs-on: ubuntu-latest
+    needs: [job-checkout-and-build, job-generate-third-party-notices]
+    steps:
+      # Checkout ref: master because previous job committed third_party_notices and
+      # we need to checkout master to pick up that commit
+      - name: Checkout repo
+        uses: actions/checkout@v2
+        with:
+          ref: master
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 10.x
+
+      - name: Download Cached Deps
+        id: cache-node-modules
+        uses: actions/cache@v1
+        env:
+          cache-name: node-modules
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ env.cache-name }}-
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
-      - name: Release
+      - name: Temporarily disable "required_pull_request_reviews" branch protection
+        id: disable-branch-protection
+        if: always()
+        continue-on-error: true
+        uses: actions/github-script@v1
+        with:
+          github-token: ${{ secrets.OPENSOURCE_BOT_TOKEN }}
+          previews: luke-cage-preview
+          script: |
+            const result = await github.repos.updateBranchProtection({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              branch: 'master',
+              required_status_checks: null,
+              restrictions: null,
+              enforce_admins: null,
+              required_pull_request_reviews: null
+            })
+            console.log("Result:", result)
+
+      - name: Run semantic-release
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.OPENSOURCE_BOT_TOKEN }}
         run: npx semantic-release
+
+      - name: Re-enable "required_pull_request_reviews" branch protection
+        id: enable-branch-protection
+        if: always()
+        continue-on-error: true
+        uses: actions/github-script@v1
+        with:
+          github-token: ${{ secrets.OPENSOURCE_BOT_TOKEN }}
+          previews: luke-cage-preview
+          script: |
+            const result = await github.repos.updateBranchProtection({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              branch: 'master',
+              required_status_checks: null,
+              restrictions: null,
+              enforce_admins: null,
+              required_pull_request_reviews: {
+                required_approving_review_count: 1
+              }
+            })
+            console.log("Result:", result)
