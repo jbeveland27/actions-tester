@@ -1,3 +1,10 @@
+## [1.3.3](https://github.com/jbeveland27/actions-tester/compare/v1.3.2...v1.3.3) (2020-06-11)
+
+
+### Bug Fixes
+
+* fetch more than HEAD so checking is package.json changed works ([be64d50](https://github.com/jbeveland27/actions-tester/commit/be64d502b06567856a8b9e1cdbcc14dbc4d19b17))
+
 ## [1.3.2](https://github.com/jbeveland27/actions-tester/compare/v1.3.1...v1.3.2) (2020-06-11)
 
 
