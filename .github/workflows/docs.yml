@@ -59,7 +59,11 @@ jobs:
       - name: Sync wiki to docs
         run: |
           function debug() {
-              echo "::debug::$1"
+              echo "$1"
+          }
+
+          function warning() {
+              echo "::warning::$1"
           }
 
           function error() {
@@ -125,7 +129,7 @@ jobs:
                 git push origin master
             )
           else 
-            echo "No file diff between wiki and docs. Exiting."
+            warning "No file diff between wiki and docs. Exiting."
           fi 
           rm -rf "$tmp_dir"
           debug "Finished - Wiki synced to docs dir"
@@ -153,6 +157,10 @@ jobs:
         run: |
           function debug() {
               echo "$1"
+          }
+
+          function warning() {
+              echo "::warning::$1"
           }
 
           function error() {
@@ -213,7 +221,7 @@ jobs:
                 git push --set-upstream "$GIT_REPOSITORY_URL" master
             )
           else 
-            echo "No file diff between docs and wiki. Exiting."
+            warning "No file diff between docs and wiki. Exiting."
           fi 
 
           rm -rf "$tmp_dir"
