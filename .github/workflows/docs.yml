@@ -15,6 +15,34 @@ env:
   THIRD_PARTY_GIT_AUTHOR_NAME: nr-opensource-bot
 
 jobs:
+  log-context:
+    runs-on: [ubuntu-latest]
+    if: 1 == 1 # make false to skip
+    steps:
+      # Dump all contexts
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
+      - name: Dump job context
+        env:
+        run: echo "$JOB_CONTEXT"
+      - name: Dump steps context
+        env:
+          STEPS_CONTEXT: ${{ toJson(steps) }}
+        run: echo "$STEPS_CONTEXT"
+      - name: Dump runner context
+        env:
+          RUNNER_CONTEXT: ${{ toJson(runner) }}
+        run: echo "$RUNNER_CONTEXT"
+      - name: Dump strategy context
+        env:
+          STRATEGY_CONTEXT: ${{ toJson(strategy) }}
+        run: echo "$STRATEGY_CONTEXT"
+      - name: Dump matrix context
+        env:
+          MATRIX_CONTEXT: ${{ toJson(matrix) }}
+        run: echo "$MATRIX_CONTEXT"
   # Syncs changes made to the Wiki through the GitHub UI to the docs directory
   # Modified from: https://github.com/SwiftDocOrg/github-wiki-publish-action/blob/v1/entrypoint.sh
   job-sync-wiki-to-docs:
