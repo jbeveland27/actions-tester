@@ -90,6 +90,11 @@ jobs:
 
           add_mask "${GH_PERSONAL_ACCESS_TOKEN}"
 
+          if [ -z "${WIKI_COMMIT_MESSAGE:-}" ]; then
+              debug "WIKI_COMMIT_MESSAGE not set, using default"
+              WIKI_COMMIT_MESSAGE='Automatically publish wiki'
+          fi
+
           GIT_REPOSITORY_URL="https://${GH_PERSONAL_ACCESS_TOKEN}@github.com/$GITHUB_REPOSITORY.wiki.git"
 
           debug "Checking out wiki repository"
