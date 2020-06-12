@@ -199,7 +199,6 @@ jobs:
 
           debug "diffing files"
           debug $tmp_dir
-          diff -qr --exclude=.git docs $tmp_dir
           pwd
           files_modified=$(diff -qr --exclude=.git docs $tmp_dir &>/dev/null || :)
           echo -n "files_modified:\n $files_modified"
@@ -233,6 +232,7 @@ jobs:
           else 
             echo "No file diff between docs and wiki. Exiting."
           fi 
+
           rm -rf "$tmp_dir"
           debug "Finished - Wiki synced to docs dir"
           exit 0
