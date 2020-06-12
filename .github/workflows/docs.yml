@@ -198,7 +198,7 @@ jobs:
           )
 
           files_modified=$(diff -qr --exclude=.git docs/ $tmp_dir)
-          if [ files_modifies != "" ]; then
+          if [ files_modified != "" ]; then
 
             debug "Syncing contents of docs to wiki repository"
             rsync -avzr --delete --exclude='.git/' "docs/" "$tmp_dir"
