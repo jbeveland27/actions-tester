@@ -197,11 +197,10 @@ jobs:
               git pull "$GIT_REPOSITORY_URL"
           )
 
-          debug "diff'ing files"
-          pwd
-          ls -la
+          debug "diffing files"
+          debug $tmp_dir
           files_modified=$(diff -qr --exclude=.git docs/ $tmp_dir)
-          debug $files_modified
+          echo -n "files_modified:\n $files_modified"
           pwd
           ls -la
           if [ "$files_modified" != "" ]; then
