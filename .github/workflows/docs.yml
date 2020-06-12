@@ -79,7 +79,7 @@ jobs:
               git pull "$GIT_REPOSITORY_URL"
           )
 
-          debug "Syncing contents of Wiki to repository dir: $1"
+          debug "Syncing contents of Wiki to repository dir docs"
           rsync -avzr --delete --exclude='.git/' "$tmp_dir" "docs"
 
           debug "Committing and pushing changes"
