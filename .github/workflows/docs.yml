@@ -104,6 +104,8 @@ jobs:
           rsync -avzr --delete --exclude='.git/' "$tmp_dir/" "docs"
 
           debug "Committing and pushing changes"
+          pwd
+          ls -la
           (
               # cd "$tmp_dir" || exit 1
               git config user.name "${{ env.THIRD_PARTY_GIT_AUTHOR_NAME }}"
@@ -112,6 +114,11 @@ jobs:
               git commit -m "$WIKI_COMMIT_MESSAGE"
               git push --set-upstream "$GIT_REPOSITORY_URL" master
           )
+          pwd
+          ls -la
+          debug "Changes pushed"
+          rm -rf "$tmp_dir"
+          exit 0
 
       # - name: Checkout Wiki
       #   uses: actions/checkout@v2
