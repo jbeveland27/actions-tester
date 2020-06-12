@@ -201,7 +201,7 @@ jobs:
           debug $tmp_dir
           diff -qr --exclude=.git docs $tmp_dir
           pwd
-          files_modified=$(diff -qr --exclude=.git docs $tmp_dir &>/dev/null;)
+          files_modified=$(diff -qr --exclude=.git docs $tmp_dir &>/dev/null || :)
           echo -n "files_modified:\n $files_modified"
           pwd
           ls -la
