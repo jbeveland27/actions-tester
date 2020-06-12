@@ -11,16 +11,96 @@ on:
   gollum:
 
 jobs:
+  log-context:
+    runs-on: ubuntu-latest
+    if: 1 == 1 # make false to skip
+    steps:
+      # Dump all contexts
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
+      - name: Dump job context
+        env:
+          JOB_CONTEXT: ${{ toJson(job) }}
+        run: echo "$JOB_CONTEXT"
+      - name: Dump steps context
+        env:
+          STEPS_CONTEXT: ${{ toJson(steps) }}
+        run: echo "$STEPS_CONTEXT"
+      - name: Dump runner context
+        env:
+          RUNNER_CONTEXT: ${{ toJson(runner) }}
+        run: echo "$RUNNER_CONTEXT"
+      - name: Dump strategy context
+        env:
+          STRATEGY_CONTEXT: ${{ toJson(strategy) }}
+        run: echo "$STRATEGY_CONTEXT"
+      - name: Dump matrix context
+        env:
+          MATRIX_CONTEXT: ${{ toJson(matrix) }}
+        run: echo "$MATRIX_CONTEXT"
+
   job-sync-wiki-to-docs:
     runs-on: ubuntu-latest
+    if: github.event_name == 'gollum'
+    env:
+      GH_PERSONAL_ACCESS_TOKEN: ${{ secrets.NEWRELIC_BOT_TOKEN }}
     steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v2
       - name: Print Payload
         run: |
           echo ${{ github.event }}
           echo ${{ toJson(github.event) }}
           echo ${{ toJson(github.event.gollum) }}
+
+          function debug() {
+              echo "::debug file=${BASH_SOURCE[0]},line=${BASH_LINENO[0]}::$1"
+          }
+          function warning() {
+              echo "::warning file=${BASH_SOURCE[0]},line=${BASH_LINENO[0]}::$1"
+          }
+
+          function error() {
+              echo "::error file=${BASH_SOURCE[0]},line=${BASH_LINENO[0]}::$1"
+          }
+
+          function add_mask() {
+              echo "::add-mask::$1"
+          }
+
+          GIT_REPOSITORY_URL="https://${GH_PERSONAL_ACCESS_TOKEN}@github.com/$GITHUB_REPOSITORY.wiki.git"
+
+          debug "Checking out wiki repository"
+          tmp_dir=$(mktemp -d -t ci-XXXXXXXXXX)
+          (
+              cd "$tmp_dir" || exit 1
+              git init
+              git config user.name "$GITHUB_ACTOR"
+              git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+              git pull "$GIT_REPOSITORY_URL"
+          )
+
+          debug "Syncing contents of Wiki to repository dir: $1"
+          rsync -avzr --delete --exclude='.git/' "$tmp_dir" "docs"
+
+          debug "Committing and pushing changes"
+          (
+              cd "$tmp_dir" || exit 1
+              git add .
+              git commit -m "$WIKI_COMMIT_MESSAGE"
+              git push --set-upstream "$GIT_REPOSITORY_URL" master
+          )
+
+      # - name: Checkout Wiki
+      #   uses: actions/checkout@v2
+      #   with:
+      #     repository:
+
   job-sync-docs-to-wiki:
     runs-on: ubuntu-latest
+    if: github.event_name != 'gollum'
     steps:
       - uses: actions/checkout@v2
       # Additional steps to generate documentation in "Documentation" directory
