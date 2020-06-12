@@ -53,6 +53,8 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.NEWRELIC_BOT_TOKEN }} # allows us to push back to repo
       - name: Print Payload
         run: |
 
