@@ -105,8 +105,9 @@ jobs:
               git pull "$GIT_REPOSITORY_URL"
           )
 
-          files_modified=$(diff -qr --exclude=.git docs/ $tmp_dir)
-          if [ files_modifies != "" ]; then
+          debug "diffing files"
+          files_modified=$(diff -qr --exclude=.git docs $tmp_dir || true) # diff returns -1 if there are differences, which exits the workflow
+          if [ "$files_modified" != "" ]; then
 
             debug "Syncing contents of Wiki to repository dir docs"
             rsync -avzr --delete --exclude='.git/' "$tmp_dir/" "docs"
@@ -198,29 +199,11 @@ jobs:
           )
 
           debug "diffing files"
-          debug $tmp_dir
-          pwd
-          files_modified=$(diff -qr --exclude=.git docs $tmp_dir || :)
-          echo -n "files_modified:\n $files_modified"
-          pwd
-          ls -la
+          files_modified=$(diff -qr --exclude=.git docs $tmp_dir || true) # diff returns -1 if there are differences, which exits the workflow
           if [ "$files_modified" != "" ]; then
 
             debug "Syncing contents of docs to wiki repository"
             rsync -avzr --delete --exclude='.git/' "docs/" "$tmp_dir"
-
-            # debug "Committing and pushing changes"
-            # (
-            #     git config user.name "${{ env.THIRD_PARTY_GIT_AUTHOR_NAME }}"
-            #     git config user.email "${{ env.THIRD_PARTY_GIT_AUTHOR_EMAIL }}"
-                
-            #     # master could have been modified, so pull before pushing
-            #     git pull --ff-only origin master
-                
-            #     git add .
-            #     git commit -m "$WIKI_COMMIT_MESSAGE"
-            #     git push origin master
-            # )
 
             debug "Committing and pushing changes"
             (
