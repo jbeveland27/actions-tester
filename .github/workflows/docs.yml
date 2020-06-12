@@ -97,11 +97,11 @@ jobs:
           )
 
           debug "Syncing contents of Wiki to repository dir docs"
-          rsync -avzr --delete --exclude='.git/' "$tmp_dir" "docs"
+          rsync -avzr --delete --exclude='.git/' "$tmp_dir/" "docs"
 
           debug "Committing and pushing changes"
           (
-              cd "$tmp_dir" || exit 1
+              # cd "$tmp_dir" || exit 1
               git add .
               git commit -m "$WIKI_COMMIT_MESSAGE"
               git push --set-upstream "$GIT_REPOSITORY_URL" master
