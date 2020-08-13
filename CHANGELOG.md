@@ -1,3 +1,10 @@
+## [1.3.2](https://github.com/jbeveland27/actions-tester/compare/v1.3.1...v1.3.2) (2020-06-11)
+
+
+### Bug Fixes
+
+* testing commits ([4ebee45](https://github.com/jbeveland27/actions-tester/commit/4ebee45367c1b61c28e49c1a3d61ec7975228341))
+
 ## [1.3.1](https://github.com/jbeveland27/actions-tester/compare/v1.3.0...v1.3.1) (2020-06-05)
 
 
